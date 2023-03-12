@@ -9,8 +9,9 @@ export default function Home() {
     const [authInfo, setAuthInfo] = useState<any>();
     const [signinProblem, setSigninProblem] = useState<any>();
 
+    // onload
     useEffect(() => {
-        (async () => {
+        (async function subscribeToSigninEvents() {
             setSigninProblem(undefined);
 
             try {

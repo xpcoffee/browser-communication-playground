@@ -1,7 +1,12 @@
 const channel = new BroadcastChannel("signin");
 
-type AuthInfo = { userId: string; token: string };
+/**
+ * Message types
+ *
+ * Very verbose... wonder if there's a cleaner way to do this.
+ */
 
+type AuthInfo = { userId: string; token: string };
 enum MessageType {
     SIGNIN_SUCCESSFUL,
     SIGNIN_CANCELLED,
@@ -16,6 +21,10 @@ const isSigninCancelledMessage = (message: any): message is SigningSuccessfulMes
     return message.type === MessageType.SIGNIN_CANCELLED;
 };
 
+/**
+ * Signal dispatchers
+ */
+
 export const signinSuccessful = (info: AuthInfo) => {
     const message: SigningSuccessfulMessage = { type: MessageType.SIGNIN_SUCCESSFUL, ...info };
     channel.postMessage(message);
@@ -25,6 +34,10 @@ export const signinCancelled = () => {
     const message: SigningCancelledMessage = { type: MessageType.SIGNIN_CANCELLED };
     channel.postMessage(message);
 };
+
+/**
+ * Signal listeners
+ */
 
 let signInPromise: Promise<any> | undefined = undefined;
 export const listenForSignin = () => {
