@@ -10,6 +10,7 @@ type AuthInfo = { userId: string; token: string };
 enum MessageType {
     SIGNIN_SUCCESSFUL,
     SIGNIN_CANCELLED,
+    SIGNOUT,
 }
 type SigningSuccessfulMessage = { type: MessageType.SIGNIN_SUCCESSFUL } & AuthInfo;
 const isSigninSuccessfulMessage = (message: any): message is SigningSuccessfulMessage => {
@@ -19,6 +20,11 @@ const isSigninSuccessfulMessage = (message: any): message is SigningSuccessfulMe
 type SigningCancelledMessage = { type: MessageType.SIGNIN_CANCELLED };
 const isSigninCancelledMessage = (message: any): message is SigningSuccessfulMessage => {
     return message.type === MessageType.SIGNIN_CANCELLED;
+};
+
+type SignoutMessage = { type: MessageType.SIGNOUT };
+const isSignoutMessage = (message: any): message is SignoutMessage => {
+    return message.type === MessageType.SIGNOUT;
 };
 
 /**
@@ -35,29 +41,35 @@ export const signinCancelled = () => {
     channel.postMessage(message);
 };
 
+export const signout = () => {
+    const message: SignoutMessage = { type: MessageType.SIGNOUT };
+    channel.postMessage(message);
+};
+
 /**
  * Signal listeners
  */
 
-let signInPromise: Promise<any> | undefined = undefined;
-export const listenForSignin = () => {
-    if (signInPromise !== undefined) {
-        return signInPromise;
-    }
+export const listenForSignin = ({
+    onSuccess,
+    onCancel,
+    onSignout,
+}: {
+    onSuccess: (info: AuthInfo) => void;
+    onCancel?: () => void;
+    onSignout?: () => void;
+}) => {
+    channel.onmessage = ({ data }) => {
+        if (isSigninSuccessfulMessage(data)) {
+            onSuccess({ userId: data.userId, token: data.token });
+        }
 
-    signInPromise = new Promise((resolve, reject) => {
-        channel.onmessage = ({ data }) => {
-            if (isSigninSuccessfulMessage(data)) {
-                resolve({ userId: data.userId, token: data.token });
-            }
+        if (isSigninCancelledMessage(data)) {
+            onCancel?.();
+        }
 
-            if (isSigninCancelledMessage(data)) {
-                reject("Signin cancelled");
-            }
-        };
-    }).finally(() => {
-        signInPromise = undefined;
-    });
-
-    return signInPromise;
+        if (isSignoutMessage(data)) {
+            onSignout?.();
+        }
+    };
 };

@@ -4,7 +4,7 @@ import { signinCancelled, signinSuccessful } from "../signinChannel";
 
 export default function SigninPage() {
     return (
-        <>
+        <main>
             <h1>Sign in</h1>
             <button
                 onClick={() => {
@@ -12,7 +12,7 @@ export default function SigninPage() {
                     window.close();
                 }}
             >
-                Sign in
+                Confirm
             </button>
             <button
                 onClick={() => {
@@ -22,6 +22,6 @@ export default function SigninPage() {
             >
                 Cancel
             </button>
-        </>
+        </main>
     );
 }
