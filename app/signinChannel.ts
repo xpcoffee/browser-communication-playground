@@ -26,7 +26,6 @@ export const signinCancelled = () => {
     channel.postMessage(message);
 };
 
-const SIGNIN_TIMEOUT_MS = 15 * 1000;
 let signInPromise: Promise<any> | undefined = undefined;
 export const listenForSignin = () => {
     if (signInPromise !== undefined) {
@@ -35,8 +34,6 @@ export const listenForSignin = () => {
 
     signInPromise = new Promise((resolve, reject) => {
         channel.onmessage = ({ data }) => {
-            setTimeout(() => reject("Signin timed out"), SIGNIN_TIMEOUT_MS);
-
             if (isSigninSuccessfulMessage(data)) {
                 resolve({ userId: data.userId, token: data.token });
             }
