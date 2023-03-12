@@ -1,18 +1,38 @@
-import styles from "./page.module.css";
-import { listen } from "./broadcastChannel";
-import Link from "next/link";
+"use client";
 
-let eventListener = console.log;
-const { close, post } = listen(eventListener);
+import styles from "./page.module.css";
+import { listenForSignin } from "./signinChannel";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+    const [authInfo, setAuthInfo] = useState<any>();
+    const [signinProblem, setSigninProblem] = useState<any>();
+
+    useEffect(() => {
+        (async () => {
+            setSigninProblem(undefined);
+
+            try {
+                const info = await listenForSignin();
+                setAuthInfo(info);
+            } catch (e) {
+                setSigninProblem(e);
+            }
+        })();
+    }, []);
+
     return (
         <main className={styles.main}>
-            <div>hello there!</div>
-            <Link href={"/about"} target={"_blank"}>
-                About
-            </Link>
-            <button onClick={() => post("hello world")}>Send message</button>
+            {authInfo && <div>Signed in successfully</div>}
+            {!authInfo && (
+                <div>
+                    <Link href={"/signin"} target={"_blank"}>
+                        Sign in
+                    </Link>
+                </div>
+            )}
+            {signinProblem && <div>Problem signing in: {signinProblem}</div>}
         </main>
     );
 }
